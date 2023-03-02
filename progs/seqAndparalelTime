@@ -1,0 +1,38 @@
+package main
+
+import (
+	"fmt"
+	"net/http"
+	"time"
+)
+
+func main() {
+	sequentialTime := hitIRCTCSequentially()
+	parallelTime := hitIRCTCParallel()
+	fmt.Printf("Sequential Time: %v\nParallel Time: %v\n", sequentialTime, parallelTime)
+}
+
+func hitIRCTCSequentially() time.Duration {
+	start := time.Now()
+	for i := 0; i < 3; i++ {
+		http.Get("http://www.irctc.co.in")
+	}
+	end := time.Now()
+	return end.Sub(start)
+}
+
+func hitIRCTCParallel() time.Duration {
+	start := time.Now()
+	ch := make(chan bool, 3)
+	for i := 0; i < 3; i++ {
+		go func() {
+			http.Get("http://www.irctc.co.in")
+			ch <- true
+		}()
+	}
+	for i := 0; i < 3; i++ {
+		<-ch
+	}
+	end := time.Now()
+	return end.Sub(start)
+}
