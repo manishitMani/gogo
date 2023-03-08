@@ -1,0 +1,98 @@
+Designing a search indexing system in Golang can be achieved using a combination of data structures and algorithms to efficiently store, retrieve and update the index. Here is a high-level design for a search indexing system in Golang:
+
+1-> Define the data model: Define the structure of the data to be indexed. This could include fields such as title, description, tags, author, etc.
+
+2-> Define the indexing algorithm: Decide on the indexing algorithm to be used. A common algorithm is the inverted index, which involves creating a mapping of each unique term to the documents that contain it.
+
+3-> Create a data structure to store the index: A common data structure used to store the index is a hash table. Each term is stored as a key in the hash table, and the value is a list of document IDs that contain the term.
+
+4-> Define a way to tokenize and normalize the data: Tokenization involves breaking down the text into individual words or terms. Normalization involves converting the text to a standard form to eliminate any variations such as case sensitivity.
+
+5-> Implement the indexing algorithm: Iterate over the data, tokenize and normalize each field, and add it to the index.
+
+6-> Define a query processing algorithm: Define how queries will be processed. One approach is to use a boolean retrieval model, where a query is evaluated as a combination of boolean expressions on the terms in the index.
+
+7-> Implement the query processing algorithm: Parse the user query, tokenize and normalize it, and retrieve the documents that match the query from the index.
+
+8-> Define a ranking algorithm: Decide on the ranking algorithm to be used to order the documents that match the query. A common ranking algorithm is the tf-idf algorithm, which calculates the relevance of a document based on the frequency of the query terms in the document and their frequency in the entire corpus.
+
+9-> Implement the ranking algorithm: Apply the ranking algorithm to the documents that match the query and return the results in descending order of relevance.
+
+10-> Ensure efficient updates: To ensure efficient updates to the index, consider using a data structure such as a B-tree or a hash table that supports fast insertions and deletions.
+
+Overall, designing a search indexing system in Golang requires careful consideration of the data model, indexing algorithm, data structures, query processing algorithm, and ranking algorithm.
+
+
+///// SEARCH INDEXING CODE ////
+
+package main
+
+import (
+    "fmt"
+    "strings"
+)
+
+type Document struct {
+    Id          int
+    Title       string
+    Description string
+}
+
+type Index map[string][]int
+
+func tokenize(text string) []string {
+    return strings.Split(text, " ")
+}
+
+func normalize(token string) string {
+    return strings.ToLower(token)
+}
+
+func indexDocument(doc Document, idx Index) {
+    fields := []string{doc.Title, doc.Description}
+    for _, field := range fields {
+        tokens := tokenize(field)
+        for _, token := range tokens {
+            term := normalize(token)
+            idx[term] = append(idx[term], doc.Id)
+        }
+    }
+}
+
+func search(query string, idx Index) []int {
+    terms := tokenize(query)
+    var result []int
+    for _, term := range terms {
+        term = normalize(term)
+        if ids, ok := idx[term]; ok {
+            result = append(result, ids...)
+        }
+    }
+    return result
+}
+
+func main() {
+    idx := make(Index)
+    docs := []Document{
+        Document{1, "Golang Tutorial", "A tutorial for learning Golang"},
+        Document{2, "Golang Programming", "Learn how to program in Golang"},
+        Document{3, "Golang Examples", "Examples of Golang programs"},
+    }
+
+    for _, doc := range docs {
+        indexDocument(doc, idx)
+    }
+
+    fmt.Println("Index:", idx)
+
+    query := "Golang"
+    result := search(query, idx)
+
+    fmt.Printf("Search results for '%s': %v\n", query, result)
+}
+
+
+
+
+
+
